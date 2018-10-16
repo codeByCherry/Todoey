@@ -12,17 +12,14 @@ class TodoListViewController: UITableViewController {
 
     var itemArr:[Item] = [Item]()
     
-    let arrKey = "ItemModelArray"
+    
     let defaults = UserDefaults.standard
     let filePath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("Items.plist")
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        //TODO:: 读取写入的items
         
-       
-        if let arr = defaults.array(forKey: arrKey) {
-            itemArr = arr as! [Item]
-        }
     }
     
     
@@ -57,6 +54,7 @@ class TodoListViewController: UITableViewController {
         let curItem = itemArr[indexPath.row]
         
         curItem.done = !curItem.done
+        saveItems()
         self.tableView.reloadRows(at: [indexPath], with: .fade)
         
     }
@@ -97,7 +95,14 @@ class TodoListViewController: UITableViewController {
         curItem.title = newItem ?? "no title"
         curItem.done = false
         itemArr.append(curItem)
-        
+        saveItems()
+        let newIndexPath = IndexPath(item: self.itemArr.count-1, section: 0)
+        self.tableView.insertRows(at: [newIndexPath], with:.fade)
+    }
+    
+    
+    // TODO:: 保存数据到本地磁盘
+    func saveItems() {
         let encoder = PropertyListEncoder()
         do {
             let data = try encoder.encode(itemArr)
@@ -106,9 +111,6 @@ class TodoListViewController: UITableViewController {
         } catch {
             print("保存items数据失败")
         }
-        
-        let newIndexPath = IndexPath(item: self.itemArr.count-1, section: 0)
-        self.tableView.insertRows(at: [newIndexPath], with:.fade)
     }
     
 }
