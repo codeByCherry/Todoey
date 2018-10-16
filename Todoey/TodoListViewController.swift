@@ -49,5 +49,32 @@ class TodoListViewController: UITableViewController {
         }
     }
 
+    // MARK:- Add new item.
+    @IBAction func addItemPressed(_ sender: UIBarButtonItem) {
+        let alert = UIAlertController(title: "Add New Todoey item", message: "", preferredStyle: .alert)
+ 
+        alert.addTextField { (textfield) in
+            textfield.placeholder = "create new item"
+
+        }
+        // change action item color
+        //alert.view.tintColor = UIColor.green
+        let action = UIAlertAction(title: "add item?", style: .default) { (action) in
+            // when user click add item button.
+            print("action: add item")
+            print(alert.textFields?.first?.text as Any)
+        }
+        
+        let cancel = UIAlertAction(title: "cancel", style: .cancel) {(action) in
+            print("action: cancel")
+            
+        }
+        
+        alert.addAction(action)
+        alert.addAction(cancel)
+        
+        present(alert, animated: true, completion: nil)
+    }
+    
 }
 
