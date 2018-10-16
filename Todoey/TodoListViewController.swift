@@ -10,7 +10,7 @@ import UIKit
 
 class TodoListViewController: UITableViewController {
 
-    let todoArray:[String] = ["Find Milk", "Get Egg", "Write Log"]
+    let itemArr:[String] = ["Find Milk", "Get Egg", "Write Log"]
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -23,13 +23,14 @@ class TodoListViewController: UITableViewController {
     }
     
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return todoArray.count
+        return itemArr.count
     }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "ToDoCell")
-        cell?.textLabel?.text = todoArray[indexPath.row]
-        return cell!
+        let cell = tableView.dequeueReusableCell(withIdentifier: "ToDoCell", for: indexPath)
+        cell.textLabel?.text = itemArr[indexPath.row]
+        
+        return cell
     }
 
 
