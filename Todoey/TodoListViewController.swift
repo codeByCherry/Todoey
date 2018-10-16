@@ -11,12 +11,21 @@ import UIKit
 class TodoListViewController: UITableViewController {
 
     var itemArr:[String] = ["Find Milk", "Get Egg", "Write Log"]
+    let arrKey = "ItemArray"
+    let userDefault = UserDefaults.standard
     
     override func viewDidLoad() {
         super.viewDidLoad()
-
+        
+        print(NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true))
+       
+        if let arr = userDefault.array(forKey: arrKey) {
+            itemArr = arr as! [String]
+        }
     }
     
+    
+
     
     // MARK:- TableView DataSource
     
@@ -84,6 +93,7 @@ class TodoListViewController: UITableViewController {
     
     func addNewItemAndUpdateView(_ newItem : String?) {
         self.itemArr.append(newItem ?? "no input")
+        userDefault.setValue(itemArr, forKey: arrKey)
         let newIndexPath = IndexPath(item: self.itemArr.count-1, section: 0)
         self.tableView.insertRows(at: [newIndexPath], with:.fade)
     }
