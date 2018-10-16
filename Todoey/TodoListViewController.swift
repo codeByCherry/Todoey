@@ -17,7 +17,9 @@ class TodoListViewController: UITableViewController {
 
     }
     
-    //MARK- TableView DataSource
+    
+    // MARK:- TableView DataSource
+    
     override func numberOfSections(in tableView: UITableView) -> Int {
         return 1
     }
@@ -33,6 +35,19 @@ class TodoListViewController: UITableViewController {
         return cell
     }
 
+    
+    // MARK:- tableview delegate methods
+
+    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        tableView.deselectRow(at: indexPath, animated: true)
+        let cell = tableView.cellForRow(at: indexPath)
+        
+        if cell?.accessoryType == .checkmark {
+            cell?.accessoryType = .none
+        } else {
+            cell?.accessoryType = .checkmark
+        }
+    }
 
 }
 
