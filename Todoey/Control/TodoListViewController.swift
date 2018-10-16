@@ -10,17 +10,17 @@ import UIKit
 
 class TodoListViewController: UITableViewController {
 
-    var itemArr:[String] = ["Find Milk", "Get Egg", "Write Log"]
-    let arrKey = "ItemArray"
-    let userDefault = UserDefaults.standard
+    var itemArr:[Item] = [Item]()
+    
+    let arrKey = "ItemModelArray"
+    let defaults = UserDefaults.standard
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
         print(NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true))
        
-        if let arr = userDefault.array(forKey: arrKey) {
-            itemArr = arr as! [String]
+        if let arr = defaults.array(forKey: arrKey) {
+            itemArr = arr as! [Item]
         }
     }
     
@@ -41,8 +41,14 @@ class TodoListViewController: UITableViewController {
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "ToDoCell", for: indexPath)
-        cell.textLabel?.text = itemArr[indexPath.row]
+        let curItem = itemArr[indexPath.row]
+        cell.textLabel?.text = curItem.title
         
+        if curItem.done == true {
+            cell.accessoryType = .checkmark
+        } else {
+            cell.accessoryType = .none
+        }
         return cell
     }
 
@@ -51,13 +57,11 @@ class TodoListViewController: UITableViewController {
 
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
-        let cell = tableView.cellForRow(at: indexPath)
+        let curItem = itemArr[indexPath.row]
         
-        if cell?.accessoryType == .checkmark {
-            cell?.accessoryType = .none
-        } else {
-            cell?.accessoryType = .checkmark
-        }
+        curItem.done = !curItem.done
+        self.tableView.reloadRows(at: [indexPath], with: .fade)
+        
     }
     
 
@@ -92,8 +96,12 @@ class TodoListViewController: UITableViewController {
     
     
     func addNewItemAndUpdateView(_ newItem : String?) {
-        self.itemArr.append(newItem ?? "no input")
-        userDefault.setValue(itemArr, forKey: arrKey)
+        let curItem = Item()
+        curItem.title = newItem ?? "no title"
+        curItem.done = false
+        itemArr.append(curItem)
+        // TODO:: save item in local.
+        // defaults.setValue(itemArr, forKey: arrKey)
         let newIndexPath = IndexPath(item: self.itemArr.count-1, section: 0)
         self.tableView.insertRows(at: [newIndexPath], with:.fade)
     }
