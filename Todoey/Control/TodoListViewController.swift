@@ -19,7 +19,7 @@ class TodoListViewController: UITableViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         //TODO:: 读取写入的items
-        
+        loadItems()
     }
     
     
@@ -113,6 +113,16 @@ class TodoListViewController: UITableViewController {
         }
     }
     
+    func loadItems() {
+        if let data = try? Data(contentsOf: filePath!) {
+            do {
+                let decoder = PropertyListDecoder()
+                itemArr = try decoder.decode([Item].self, from: data)
+            } catch {
+                print("读取数据失败")
+            }
+        }
+    }
 }
 
 
