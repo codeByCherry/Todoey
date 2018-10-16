@@ -10,7 +10,7 @@ import UIKit
 
 class TodoListViewController: UITableViewController {
 
-    let itemArr:[String] = ["Find Milk", "Get Egg", "Write Log"]
+    var itemArr:[String] = ["Find Milk", "Get Egg", "Write Log"]
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -24,9 +24,11 @@ class TodoListViewController: UITableViewController {
         return 1
     }
     
+    
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return itemArr.count
     }
+    
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "ToDoCell", for: indexPath)
@@ -48,6 +50,7 @@ class TodoListViewController: UITableViewController {
             cell?.accessoryType = .checkmark
         }
     }
+    
 
     // MARK:- Add new item.
     @IBAction func addItemPressed(_ sender: UIBarButtonItem) {
@@ -57,17 +60,19 @@ class TodoListViewController: UITableViewController {
             textfield.placeholder = "create new item"
 
         }
+        
         // change action item color
         //alert.view.tintColor = UIColor.green
+        alert.tabBarController?.tabBar.backgroundColor = UIColor.red
+
         let action = UIAlertAction(title: "add item?", style: .default) { (action) in
             // when user click add item button.
             print("action: add item")
-            print(alert.textFields?.first?.text as Any)
+            self.addNewItemAndUpdateView(alert.textFields?.first?.text)
         }
         
         let cancel = UIAlertAction(title: "cancel", style: .cancel) {(action) in
             print("action: cancel")
-            
         }
         
         alert.addAction(action)
@@ -76,5 +81,14 @@ class TodoListViewController: UITableViewController {
         present(alert, animated: true, completion: nil)
     }
     
+    
+    func addNewItemAndUpdateView(_ newItem : String?) {
+        self.itemArr.append(newItem ?? "no input")
+        let newIndexPath = IndexPath(item: self.itemArr.count-1, section: 0)
+        self.tableView.insertRows(at: [newIndexPath], with:.fade)
+    }
+    
 }
+
+
 
