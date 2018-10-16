@@ -14,10 +14,11 @@ class TodoListViewController: UITableViewController {
     
     let arrKey = "ItemModelArray"
     let defaults = UserDefaults.standard
+    let filePath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("Items.plist")
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        print(NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true))
+        
        
         if let arr = defaults.array(forKey: arrKey) {
             itemArr = arr as! [Item]
@@ -42,13 +43,9 @@ class TodoListViewController: UITableViewController {
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "ToDoCell", for: indexPath)
         let curItem = itemArr[indexPath.row]
-        cell.textLabel?.text = curItem.title
         
-        if curItem.done == true {
-            cell.accessoryType = .checkmark
-        } else {
-            cell.accessoryType = .none
-        }
+        cell.textLabel?.text = curItem.title
+        cell.accessoryType = curItem.done ? .checkmark : .none
         return cell
     }
 
@@ -100,8 +97,16 @@ class TodoListViewController: UITableViewController {
         curItem.title = newItem ?? "no title"
         curItem.done = false
         itemArr.append(curItem)
-        // TODO:: save item in local.
-        // defaults.setValue(itemArr, forKey: arrKey)
+        
+        let encoder = PropertyListEncoder()
+        do {
+            let data = try encoder.encode(itemArr)
+            try data.write(to:filePath!)
+            print("save to:", filePath!)
+        } catch {
+            print("保存items数据失败")
+        }
+        
         let newIndexPath = IndexPath(item: self.itemArr.count-1, section: 0)
         self.tableView.insertRows(at: [newIndexPath], with:.fade)
     }
