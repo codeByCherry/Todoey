@@ -27,7 +27,7 @@ class TodoListViewController: UITableViewController {
         super.viewDidLoad()
         addGesture()
         //TODO:: 读取写入的items
-        itemArr = loadItems(reqeust: Item.fetchRequest())
+        itemArr = loadItems()
     }
     
     
@@ -138,7 +138,7 @@ class TodoListViewController: UITableViewController {
         
     }
     
-    func loadItems(reqeust: NSFetchRequest<Item>) -> [Item]{
+    func loadItems(reqeust: NSFetchRequest<Item> = Item.fetchRequest()) -> [Item]{
         // 推荐下面的写法，更加OOP
         // let fr = NSFetchRequest<Item>(entityName:"Item")
         // let fr2:NSFetchRequest<Item> = Item.fetchRequest()
