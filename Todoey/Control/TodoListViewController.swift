@@ -9,8 +9,11 @@
 import UIKit
 import CoreData
 
-class TodoListViewController: UITableViewController {
+class TodoListViewController: UITableViewController, UISearchBarDelegate {
 
+    
+    @IBOutlet weak var searchBar: UISearchBar!
+    
     var itemArr:[Item] = [Item]()
     
     
@@ -21,12 +24,20 @@ class TodoListViewController: UITableViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        addGesture()
         //TODO:: 读取写入的items
         loadItems()
     }
     
     
-
+    @objc func tableviewTapped() {
+        searchBar.endEditing(true)
+    }
+    
+    func addGesture() {
+        let tap = UITapGestureRecognizer(target:self , action: #selector(tableviewTapped))
+        tableView.addGestureRecognizer(tap)
+    }
     
     // MARK:- TableView DataSource
     
@@ -74,6 +85,16 @@ class TodoListViewController: UITableViewController {
             tableView.deleteRows(at: [indexPath], with: .left)
         }
         
+    }
+    
+    
+    // mark:- SearchBar
+    func searchBarTextDidEndEditing(_ searchBar: UISearchBar) {
+        print("search...")
+    }
+    
+    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+        print("search item:", searchBar.text ?? "**")
     }
     
     
