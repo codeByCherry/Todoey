@@ -57,7 +57,7 @@
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="nQy-pQ-Kqx" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="1564" y="535"/>
+            <point key="canvasLocation" x="1567" y="535"/>
         </scene>
         <!--ToDoey-->
         <scene sceneID="2tI-fj-W6h">
@@ -85,6 +85,9 @@
                     <navigationItem key="navigationItem" title="ToDoey" id="C87-hI-Zor">
                         <barButtonItem key="rightBarButtonItem" systemItem="add" id="LVS-v1-iyf">
                             <color key="tintColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                            <connections>
+                                <action selector="addCategoryPressed:" destination="GKq-3j-KBD" id="Vyy-oU-3JH"/>
+                            </connections>
                         </barButtonItem>
                     </navigationItem>
                     <connections>
@@ -93,7 +96,7 @@
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="SVi-bE-GaV" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="804" y="535"/>
+            <point key="canvasLocation" x="855" y="535"/>
         </scene>
         <!--Navigation Controller-->
         <scene sceneID="G6u-9w-GrT">

@@ -13,6 +13,11 @@ class TodoListViewController: UITableViewController {
 
     @IBOutlet weak var searchBar: UISearchBar!
 
+    var selectedCategory: Category? {
+        didSet {
+            itemArr = self.loadItems()
+        }
+    }
     
     var tmpArr = [Item]()
     var itemArr:[Item] = [Item]()
@@ -117,6 +122,8 @@ class TodoListViewController: UITableViewController {
         let curItem = Item(context: context)
         curItem.title = newItem ?? "no title"
         curItem.done = false
+        curItem.parentCategory = selectedCategory
+        
         itemArr.append(curItem)
         saveItems()
         let newIndexPath = IndexPath(item: self.itemArr.count-1, section: 0)
@@ -143,6 +150,19 @@ class TodoListViewController: UITableViewController {
         // let fr2:NSFetchRequest<Item> = Item.fetchRequest()
         
         var results = [Item]()
+        
+        let categoryBelongPredicate = NSPredicate(format: "parentCategory.name MATCHES %@", selectedCategory!.name!)
+        
+        
+        if let titleContainsPredicate = reqeust.predicate {
+            // 携带了搜索的predicate
+            let predicates = NSCompoundPredicate(andPredicateWithSubpredicates: [titleContainsPredicate,categoryBelongPredicate])
+            reqeust.predicate = predicates
+            
+        } else {
+            reqeust.predicate = categoryBelongPredicate
+        }
+        
         do {
             results = try context.fetch(reqeust)
 
