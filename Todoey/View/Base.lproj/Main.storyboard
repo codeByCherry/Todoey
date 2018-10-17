@@ -85,6 +85,9 @@
                     <navigationItem key="navigationItem" title="ToDoey" id="C87-hI-Zor">
                         <barButtonItem key="rightBarButtonItem" systemItem="add" id="LVS-v1-iyf">
                             <color key="tintColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                            <connections>
+                                <action selector="addCategoryPressed:" destination="GKq-3j-KBD" id="Vyy-oU-3JH"/>
+                            </connections>
                         </barButtonItem>
                     </navigationItem>
                     <connections>
