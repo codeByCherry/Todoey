@@ -25,7 +25,6 @@ class TodoListViewController: UITableViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        addGesture()
         //TODO:: 读取写入的items
         itemArr = loadItems()
     }
@@ -168,16 +167,6 @@ class TodoListViewController: UITableViewController {
 // MARK:- search bar
 extension TodoListViewController: UISearchBarDelegate {
 
-    
-    @objc func tableviewTapped() {
-        searchBar.endEditing(true)
-    }
-    
-    func addGesture() {
-        let tap = UITapGestureRecognizer(target:self , action: #selector(tableviewTapped))
-        tableView.addGestureRecognizer(tap)
-    }
-    
     
     func searchBarTextDidEndEditing(_ searchBar: UISearchBar) {
         print("search...")
