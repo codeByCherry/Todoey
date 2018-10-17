@@ -153,8 +153,10 @@ class TodoListViewController: UITableViewController {
     
     func deleteItem(atIndex index:NSInteger) {
         let curItem = itemArr[index]
-        itemArr.remove(at: index)
+        
         context.delete(curItem)
+        itemArr.remove(at: index)
+        
         saveItems()
     }
 }
