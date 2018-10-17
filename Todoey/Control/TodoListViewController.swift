@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import CoreData
 
 class TodoListViewController: UITableViewController {
 
@@ -15,6 +16,8 @@ class TodoListViewController: UITableViewController {
     
     let defaults = UserDefaults.standard
     let filePath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("Items.plist")
+    
+    let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -91,7 +94,9 @@ class TodoListViewController: UITableViewController {
     
     
     func addNewItemAndUpdateView(_ newItem : String?) {
-        let curItem = Item()
+        
+
+        let curItem = Item(context: context)
         curItem.title = newItem ?? "no title"
         curItem.done = false
         itemArr.append(curItem)
@@ -101,26 +106,29 @@ class TodoListViewController: UITableViewController {
     }
     
     
-    // TODO:: 保存数据到本地磁盘
     func saveItems() {
-        let encoder = PropertyListEncoder()
-        do {
-            let data = try encoder.encode(itemArr)
-            try data.write(to:filePath!)
-            print("save to:", filePath!)
-        } catch {
-            print("保存items数据失败")
+        if context.hasChanges == false {
+            return
         }
+        
+        do {
+            try context.save()
+        } catch {
+            print("Error saving context:\(error)")
+        }
+        
     }
     
     func loadItems() {
-        if let data = try? Data(contentsOf: filePath!) {
+        let fr = NSFetchRequest<Item>(entityName:"Item")
+        context.performAndWait {
+            
             do {
-                let decoder = PropertyListDecoder()
-                itemArr = try decoder.decode([Item].self, from: data)
+                self.itemArr = try context.fetch(fr)
             } catch {
-                print("读取数据失败")
+                print("load items error:\(error)")
             }
+            
         }
     }
 }
