@@ -62,7 +62,24 @@ class TodoListViewController: UITableViewController {
         
     }
     
-
+    override func tableView(_ tableView: UITableView, titleForDeleteConfirmationButtonForRowAt indexPath: IndexPath) -> String? {
+        return "Del"
+    }
+    
+    
+    override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
+        
+        if editingStyle == .delete {
+            let curItem = itemArr[indexPath.row]
+            itemArr.remove(at: indexPath.row)
+            context.delete(curItem)
+            saveItems()
+            tableView.deleteRows(at: [indexPath], with: .left)
+        }
+        
+    }
+    
+    
     // MARK:- Add new item.
     @IBAction func addItemPressed(_ sender: UIBarButtonItem) {
         let alert = UIAlertController(title: "Add New Todoey item", message: "", preferredStyle: .alert)
@@ -123,10 +140,12 @@ class TodoListViewController: UITableViewController {
         // 推荐下面的写法，更加OOP
         //let fr = NSFetchRequest<Item>(entityName:"Item")
         let fr2:NSFetchRequest<Item> = Item.fetchRequest()
+
         context.performAndWait {
             
             do {
                 self.itemArr = try context.fetch(fr2)
+                
             } catch {
                 print("load items error:\(error)")
             }
