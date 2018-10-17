@@ -169,22 +169,37 @@ extension TodoListViewController: UISearchBarDelegate {
 
     
     func searchBarTextDidEndEditing(_ searchBar: UISearchBar) {
-        print("search...")
+        
+    }
+    
+    func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
+        
     }
     
     
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
         if let inputTitle = searchBar.text {
-            searchBar.text = ""
             search(title: inputTitle)
         }
+        searchBar.endEditing(true)
+    }
+    
+    
+    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+        print("search:'\(searchText)'")
+        search(title: searchText)
     }
     
     func search(title: String) {
         
         let fetchRequest = NSFetchRequest<Item>(entityName: "Item")
-        fetchRequest.predicate = NSPredicate(format: "title CONTAINS[cd] %@", title)
-        fetchRequest.sortDescriptors = [NSSortDescriptor(key: "title", ascending: true)]
+        if title.trimmingCharacters(in: CharacterSet.whitespaces) == "" {
+            
+        } else {
+            fetchRequest.sortDescriptors = [NSSortDescriptor(key: "title", ascending: true)]
+            fetchRequest.predicate = NSPredicate(format: "title CONTAINS[cd] %@", title)
+        }
+        
 
         tmpArr = itemArr
         itemArr = loadItems(reqeust: fetchRequest)
