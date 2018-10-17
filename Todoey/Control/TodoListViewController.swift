@@ -70,10 +70,7 @@ class TodoListViewController: UITableViewController {
     override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
         
         if editingStyle == .delete {
-            let curItem = itemArr[indexPath.row]
-            itemArr.remove(at: indexPath.row)
-            context.delete(curItem)
-            saveItems()
+            deleteItem(atIndex: indexPath.row)
             tableView.deleteRows(at: [indexPath], with: .left)
         }
         
@@ -151,6 +148,14 @@ class TodoListViewController: UITableViewController {
             }
             
         }
+    }
+    
+    
+    func deleteItem(atIndex index:NSInteger) {
+        let curItem = itemArr[index]
+        itemArr.remove(at: index)
+        context.delete(curItem)
+        saveItems()
     }
 }
 
