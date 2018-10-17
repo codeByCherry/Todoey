@@ -9,10 +9,10 @@
 import UIKit
 import CoreData
 
-class TodoListViewController: UITableViewController, UISearchBarDelegate {
+class TodoListViewController: UITableViewController {
 
-    
     @IBOutlet weak var searchBar: UISearchBar!
+
     
     var itemArr:[Item] = [Item]()
     
@@ -30,14 +30,7 @@ class TodoListViewController: UITableViewController, UISearchBarDelegate {
     }
     
     
-    @objc func tableviewTapped() {
-        searchBar.endEditing(true)
-    }
-    
-    func addGesture() {
-        let tap = UITapGestureRecognizer(target:self , action: #selector(tableviewTapped))
-        tableView.addGestureRecognizer(tap)
-    }
+
     
     // MARK:- TableView DataSource
     
@@ -85,16 +78,6 @@ class TodoListViewController: UITableViewController, UISearchBarDelegate {
             tableView.deleteRows(at: [indexPath], with: .left)
         }
         
-    }
-    
-    
-    // mark:- SearchBar
-    func searchBarTextDidEndEditing(_ searchBar: UISearchBar) {
-        print("search...")
-    }
-    
-    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
-        print("search item:", searchBar.text ?? "**")
     }
     
     
@@ -183,4 +166,31 @@ class TodoListViewController: UITableViewController, UISearchBarDelegate {
 }
 
 
+extension TodoListViewController: UISearchBarDelegate {
+
+    
+    @objc func tableviewTapped() {
+        searchBar.endEditing(true)
+    }
+    
+    func addGesture() {
+        let tap = UITapGestureRecognizer(target:self , action: #selector(tableviewTapped))
+        tableView.addGestureRecognizer(tap)
+    }
+    
+    
+    // mark:- SearchBar
+    func searchBarTextDidEndEditing(_ searchBar: UISearchBar) {
+        print("search...")
+    }
+    
+    
+    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+        if let inputTitle = searchBar.text {
+            searchBar.text = ""
+            print("search item:", inputTitle)
+        }
+    }
+    
+}
 
