@@ -12,8 +12,8 @@ import CoreData
 class CategoryViewController: UITableViewController {
 
     let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
-    
     var categories = [Category]()
+    
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -53,7 +53,20 @@ class CategoryViewController: UITableViewController {
             
         }
     }
+    
+    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        tableView.deselectRow(at: indexPath, animated: true)
+        let selectedCategory = categories[indexPath.row]
+        performSegue(withIdentifier: "ShowItems", sender: selectedCategory)
+    }
 
+    
+    
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        let todoVC = segue.destination as! TodoListViewController
+        todoVC.selectedCategory = (sender as! Category)
+    }
+    
     
     func loadCategories() -> [Category] {
         let fr:NSFetchRequest<Category> = Category.fetchRequest()
