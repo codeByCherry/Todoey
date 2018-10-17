@@ -14,6 +14,7 @@ class TodoListViewController: UITableViewController {
     @IBOutlet weak var searchBar: UISearchBar!
 
     
+    var tmpArr = [Item]()
     var itemArr:[Item] = [Item]()
     
     
@@ -26,7 +27,7 @@ class TodoListViewController: UITableViewController {
         super.viewDidLoad()
         addGesture()
         //TODO:: 读取写入的items
-        loadItems()
+        itemArr = loadItems(reqeust: Item.fetchRequest())
     }
     
     
@@ -137,21 +138,19 @@ class TodoListViewController: UITableViewController {
         
     }
     
-    func loadItems() {
+    func loadItems(reqeust: NSFetchRequest<Item>) -> [Item]{
         // 推荐下面的写法，更加OOP
-        //let fr = NSFetchRequest<Item>(entityName:"Item")
-        let fr2:NSFetchRequest<Item> = Item.fetchRequest()
+        // let fr = NSFetchRequest<Item>(entityName:"Item")
+        // let fr2:NSFetchRequest<Item> = Item.fetchRequest()
+        
+        var results = [Item]()
+        do {
+            results = try context.fetch(reqeust)
 
-        context.performAndWait {
-            
-            do {
-                self.itemArr = try context.fetch(fr2)
-                
-            } catch {
-                print("load items error:\(error)")
-            }
-            
+        } catch {
+            print("load items error:\(error)")
         }
+        return results
     }
     
     
@@ -166,6 +165,7 @@ class TodoListViewController: UITableViewController {
 }
 
 
+// MARK:- search bar
 extension TodoListViewController: UISearchBarDelegate {
 
     
@@ -179,7 +179,6 @@ extension TodoListViewController: UISearchBarDelegate {
     }
     
     
-    // mark:- SearchBar
     func searchBarTextDidEndEditing(_ searchBar: UISearchBar) {
         print("search...")
     }
@@ -188,8 +187,20 @@ extension TodoListViewController: UISearchBarDelegate {
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
         if let inputTitle = searchBar.text {
             searchBar.text = ""
-            print("search item:", inputTitle)
+            search(title: inputTitle)
         }
+    }
+    
+    func search(title: String) {
+        
+        let fetchRequest = NSFetchRequest<Item>(entityName: "Item")
+        fetchRequest.predicate = NSPredicate(format: "title CONTAINS[cd] %@", title)
+        fetchRequest.sortDescriptors = [NSSortDescriptor(key: "title", ascending: true)]
+
+        tmpArr = itemArr
+        itemArr = loadItems(reqeust: fetchRequest)
+        self.tableView.reloadData()
+        
     }
     
 }
