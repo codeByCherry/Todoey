@@ -193,8 +193,12 @@ extension TodoListViewController: UISearchBarDelegate {
     func search(title: String) {
         
         let fetchRequest = NSFetchRequest<Item>(entityName: "Item")
-        if title.trimmingCharacters(in: CharacterSet.whitespaces) == "" {
-            
+        let title = title.trimmingCharacters(in: CharacterSet.whitespaces)
+        if title.count == 0 {
+            // FixBug:: 直接点删除操作，删除searchbar中内容后，键盘不缩回。
+            DispatchQueue.main.async {
+                self.searchBar.endEditing(true)
+            }
         } else {
             fetchRequest.sortDescriptors = [NSSortDescriptor(key: "title", ascending: true)]
             fetchRequest.predicate = NSPredicate(format: "title CONTAINS[cd] %@", title)
