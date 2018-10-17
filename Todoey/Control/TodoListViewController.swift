@@ -11,6 +11,10 @@ import CoreData
 
 class TodoListViewController: UITableViewController {
 
+    @IBOutlet weak var searchBar: UISearchBar!
+
+    
+    var tmpArr = [Item]()
     var itemArr:[Item] = [Item]()
     
     
@@ -22,7 +26,7 @@ class TodoListViewController: UITableViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         //TODO:: 读取写入的items
-        loadItems()
+        itemArr = loadItems()
     }
     
     
@@ -133,21 +137,19 @@ class TodoListViewController: UITableViewController {
         
     }
     
-    func loadItems() {
+    func loadItems(reqeust: NSFetchRequest<Item> = Item.fetchRequest()) -> [Item]{
         // 推荐下面的写法，更加OOP
-        //let fr = NSFetchRequest<Item>(entityName:"Item")
-        let fr2:NSFetchRequest<Item> = Item.fetchRequest()
+        // let fr = NSFetchRequest<Item>(entityName:"Item")
+        // let fr2:NSFetchRequest<Item> = Item.fetchRequest()
+        
+        var results = [Item]()
+        do {
+            results = try context.fetch(reqeust)
 
-        context.performAndWait {
-            
-            do {
-                self.itemArr = try context.fetch(fr2)
-                
-            } catch {
-                print("load items error:\(error)")
-            }
-            
+        } catch {
+            print("load items error:\(error)")
         }
+        return results
     }
     
     
@@ -162,4 +164,52 @@ class TodoListViewController: UITableViewController {
 }
 
 
+// MARK:- search bar
+extension TodoListViewController: UISearchBarDelegate {
+
+    
+    func searchBarTextDidEndEditing(_ searchBar: UISearchBar) {
+        
+    }
+    
+    func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
+        
+    }
+    
+    
+    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+        if let inputTitle = searchBar.text {
+            search(title: inputTitle)
+        }
+        searchBar.endEditing(true)
+    }
+    
+    
+    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+        print("search:'\(searchText)'")
+        search(title: searchText)
+    }
+    
+    func search(title: String) {
+        
+        let fetchRequest = NSFetchRequest<Item>(entityName: "Item")
+        let title = title.trimmingCharacters(in: CharacterSet.whitespaces)
+        if title.count == 0 {
+            // FixBug:: 直接点删除操作，删除searchbar中内容后，键盘不缩回。
+            DispatchQueue.main.async {
+                self.searchBar.endEditing(true)
+            }
+        } else {
+            fetchRequest.sortDescriptors = [NSSortDescriptor(key: "title", ascending: true)]
+            fetchRequest.predicate = NSPredicate(format: "title CONTAINS[cd] %@", title)
+        }
+        
+
+        tmpArr = itemArr
+        itemArr = loadItems(reqeust: fetchRequest)
+        self.tableView.reloadData()
+        
+    }
+    
+}
 
