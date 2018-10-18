@@ -69,8 +69,8 @@
 		1B061150217614910061507B /* Model */ = {
 			isa = PBXGroup;
 			children = (
-				1B0611A6217832620061507B /* Item.swift */,
 				1B0611A8217832BD0061507B /* Category.swift */,
+				1B0611A6217832620061507B /* Item.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";

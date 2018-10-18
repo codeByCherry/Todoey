@@ -11,51 +11,55 @@ import RealmSwift
 
 class CategoryViewController: UITableViewController {
 
-    var categories = [Category]()
+    var categories: Results<Category>?
+    let realm = try! Realm()
     
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        categories = loadCategories()
+        loadCategories()
     }
 
+    
     // MARK: - Table view data source
-
     override func numberOfSections(in tableView: UITableView) -> Int {
         return 1
     }
 
+    
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return categories.count
+        return categories?.count ?? 1
     }
     
+    
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let curCategory = categories[indexPath.row]
         let cell = tableView.dequeueReusableCell(withIdentifier: "CategoryCell", for: indexPath)
-        cell.textLabel?.text = curCategory.name
+        if let curCategory = categories?[indexPath.row] {
+            cell.textLabel?.text = curCategory.name
+        } else {
+            cell.textLabel?.text = "Have No Category."
+        }
+
         return cell
     }
+    
     
     override func tableView(_ tableView: UITableView, titleForDeleteConfirmationButtonForRowAt indexPath: IndexPath) -> String? {
         return "DEL"
     }
     
+    
     override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
         
-//        if editingStyle == .delete {
-//            let curCategory = categories[indexPath.row]
-//            categories.remove(at: indexPath.row)
-//            context.delete(curCategory)
-//            saveContext()
-//
-//            tableView.deleteRows(at: [indexPath], with: UITableView.RowAnimation.fade)
-//
-//        }
+        if editingStyle == .delete {
+
+        }
     }
+    
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
-        let selectedCategory = categories[indexPath.row]
+        let selectedCategory = categories?[indexPath.row]
         performSegue(withIdentifier: "ShowItems", sender: selectedCategory)
     }
 
@@ -67,16 +71,8 @@ class CategoryViewController: UITableViewController {
     }
     
     
-    func loadCategories() -> [Category] {
-//        let fr:NSFetchRequest<Category> = Category.fetchRequest()
-//        var categories = [Category]()
-//        do {
-//             categories = try context.fetch(fr)
-//        } catch {
-//            print("load categories error:\(error)")
-//        }
-//
-        return [Category]()
+    func loadCategories(){
+        categories =  realm.objects(Category.self)
     }
     
     
@@ -115,16 +111,12 @@ class CategoryViewController: UITableViewController {
         let category = Category()
         category.name = name
         
-        categories.append(category)
-        saveContext()
+        try! realm.write {
+             realm.add(category)
+        }
         
-        let indexPath = IndexPath(row: categories.count-1, section: 0)
+        let indexPath = IndexPath(row: categories!.count-1, section: 0)
         self.tableView.insertRows(at: [indexPath], with: UITableView.RowAnimation.fade)
-        
     }
     
-    
-    func saveContext() {
-
-    }
 }
