@@ -28,17 +28,16 @@ class CategoryViewController: UITableViewController {
 
     
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return categories?.count ?? 1
+        
+        return categories?.count ?? 0
     }
     
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "CategoryCell", for: indexPath)
-        if let curCategory = categories?[indexPath.row] {
-            cell.textLabel?.text = curCategory.name
-        } else {
-            cell.textLabel?.text = "Have No Category."
-        }
+        
+        let category = categories?[indexPath.row]
+        cell.textLabel?.text = category?.name
 
         return cell
     }
@@ -52,15 +51,23 @@ class CategoryViewController: UITableViewController {
     override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
         
         if editingStyle == .delete {
-
+            let curCategory = categories![indexPath.row]
+            try! realm.write {
+                realm.delete(curCategory)
+            }
+            tableView.deleteRows(at: [indexPath], with: UITableView.RowAnimation.fade)
         }
     }
     
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
-        let selectedCategory = categories?[indexPath.row]
-        performSegue(withIdentifier: "ShowItems", sender: selectedCategory)
+        if let selectedCategory = categories?[indexPath.row] {
+            performSegue(withIdentifier: "ShowItems", sender: selectedCategory)
+        } else {
+            print("No categories")
+        }
+        
     }
 
     
