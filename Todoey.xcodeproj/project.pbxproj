@@ -59,8 +59,8 @@
 		1B06114F217614790061507B /* Control */ = {
 			isa = PBXGroup;
 			children = (
-				1B06117C21773E570061507B /* CategoryViewController.swift */,
 				1BDBB82D2175D5360040E9B0 /* AppDelegate.swift */,
+				1B06117C21773E570061507B /* CategoryViewController.swift */,
 				1BDBB82F2175D5360040E9B0 /* TodoListViewController.swift */,
 			);
 			path = Control;

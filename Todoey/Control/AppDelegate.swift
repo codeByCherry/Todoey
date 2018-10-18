@@ -18,6 +18,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         
+        UINavigationBar.appearance().tintColor = UIColor.white
+        
         // Realm config
         print("Realm config:")
         print(Realm.Configuration.defaultConfiguration)

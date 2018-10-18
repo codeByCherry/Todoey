@@ -18,6 +18,7 @@ class CategoryViewController: UITableViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         loadCategories()
+        
     }
 
     
@@ -123,7 +124,24 @@ class CategoryViewController: UITableViewController {
         }
         
         let indexPath = IndexPath(row: categories!.count-1, section: 0)
-        self.tableView.insertRows(at: [indexPath], with: UITableView.RowAnimation.fade)
+        if indexPath.row == 0 {
+            self.tableView.reloadData()
+        } else {
+            self.tableView.insertRows(at: [indexPath], with: UITableView.RowAnimation.fade)
+        }
+    }
+    
+    override func tableView(_ tableView: UITableView, viewForFooterInSection section: Int) -> UIView? {
+        if categories?.count ?? 0 > 0 {
+            return nil
+        } else {
+            let view = UIView(frame: CGRect(x: 0, y: 0, width: 0, height: 0))
+            return view
+        }
+    }
+    
+    override func tableView(_ tableView: UITableView, heightForFooterInSection section: Int) -> CGFloat {
+        return 1
     }
     
 }

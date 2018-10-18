@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import RealmSwift
 
 class TodoListViewController: UITableViewController {
 
@@ -14,45 +15,44 @@ class TodoListViewController: UITableViewController {
 
     var selectedCategory: Category? {
         didSet {
-            //itemArr = self.loadItems()
+            self.loadItems()
         }
     }
     
-    var tmpArr = [Item]()
-    var itemArr:[Item] = [Item]()
-    
-    
-    let defaults = UserDefaults.standard
-    let filePath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("Items.plist")
-
+    var items:Results<Item>?
+    let realm = try! Realm()
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        //TODO:: 读取写入的items
-        //itemArr = loadItems()
+
     }
     
-    
 
+    override func viewWillAppear(_ animated: Bool) {
+        self.navigationItem.leftBarButtonItem?.tintColor = UIColor.red
+    }
     
     // MARK:- TableView DataSource
-    
     override func numberOfSections(in tableView: UITableView) -> Int {
         return 1
     }
     
     
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return itemArr.count
+        return items?.count ?? 0
     }
     
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "ToDoCell", for: indexPath)
-        let curItem = itemArr[indexPath.row]
         
-        cell.textLabel?.text = curItem.title
-        cell.accessoryType = curItem.done ? .checkmark : .none
+        if let curItem = items?[indexPath.row] {
+            cell.textLabel?.text = curItem.title
+            cell.accessoryType = curItem.done ? .checkmark : .none
+        } else {
+            cell.textLabel?.text = "None"
+            cell.accessoryType = .none
+        }
         return cell
     }
 
@@ -61,11 +61,6 @@ class TodoListViewController: UITableViewController {
 
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
-        let curItem = itemArr[indexPath.row]
-        
-        curItem.done = !curItem.done
-        saveItems()
-        self.tableView.reloadRows(at: [indexPath], with: .fade)
         
     }
     
@@ -77,8 +72,13 @@ class TodoListViewController: UITableViewController {
     override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
         
         if editingStyle == .delete {
-            deleteItem(atIndex: indexPath.row)
-            tableView.deleteRows(at: [indexPath], with: .left)
+            let curItem = selectedCategory!.items[indexPath.row]
+            print("delete:", curItem.title)
+            try! realm.write {
+                realm.delete(curItem)
+            }
+            
+            tableView.reloadData()
         }
         
     }
@@ -93,9 +93,6 @@ class TodoListViewController: UITableViewController {
 
         }
         
-        // change action item color
-        //alert.view.tintColor = UIColor.green
-        alert.tabBarController?.tabBar.backgroundColor = UIColor.red
 
         let action = UIAlertAction(title: "add item?", style: .default) { (action) in
             // when user click add item button.
@@ -117,15 +114,14 @@ class TodoListViewController: UITableViewController {
     func addNewItemAndUpdateView(_ newItem : String?) {
         
 
-        let curItem = Item()
-        curItem.title = newItem ?? "no title"
-        curItem.done = false
-        //curItem.parentCategory = selectedCategory
-        
-        itemArr.append(curItem)
-        saveItems()
-        let newIndexPath = IndexPath(item: self.itemArr.count-1, section: 0)
-        self.tableView.insertRows(at: [newIndexPath], with:.fade)
+        if let curCategory = self.selectedCategory {
+            try! realm.write {
+                let curItem = Item()
+                curItem.title = newItem ?? "no title"
+                curCategory.items.append(curItem)
+            }
+        }
+        tableView.reloadData()
     }
     
     
@@ -135,7 +131,7 @@ class TodoListViewController: UITableViewController {
     }
     
     func loadItems() {
-     
+        items = selectedCategory?.items.sorted(byKeyPath: "title", ascending:true)
     }
     
     
