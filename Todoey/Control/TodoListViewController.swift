@@ -146,6 +146,12 @@ extension TodoListViewController: UISearchBarDelegate {
     
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
         if let inputTitle = searchBar.text {
+            
+            let inputTitle = inputTitle.trimmingCharacters(in: .whitespaces)
+            if inputTitle.count == 0 {
+                return
+            }
+            
             searchItem(subTitle: inputTitle)
             self.tableView.reloadData()
         }

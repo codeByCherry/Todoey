@@ -124,12 +124,7 @@ class CategoryViewController: UITableViewController {
              realm.add(category)
         }
         
-        let indexPath = IndexPath(row: categories!.count-1, section: 0)
-        if indexPath.row == 0 {
-            self.tableView.reloadData()
-        } else {
-            self.tableView.insertRows(at: [indexPath], with: UITableView.RowAnimation.fade)
-        }
+        self.tableView.reloadData()
     }
     
     override func tableView(_ tableView: UITableView, viewForFooterInSection section: Int) -> UIView? {
