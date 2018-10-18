@@ -54,6 +54,7 @@ class CategoryViewController: UITableViewController {
         if editingStyle == .delete {
             let curCategory = categories![indexPath.row]
             try! realm.write {
+                realm.delete(curCategory.items)
                 realm.delete(curCategory)
             }
             tableView.deleteRows(at: [indexPath], with: UITableView.RowAnimation.fade)
@@ -80,7 +81,7 @@ class CategoryViewController: UITableViewController {
     
     
     func loadCategories(){
-        categories =  realm.objects(Category.self)
+        categories =  realm.objects(Category.self).sorted(byKeyPath: "name", ascending: true)
     }
     
     

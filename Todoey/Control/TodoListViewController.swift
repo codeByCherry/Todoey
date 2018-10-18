@@ -24,7 +24,6 @@ class TodoListViewController: UITableViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-
     }
     
 
@@ -61,6 +60,14 @@ class TodoListViewController: UITableViewController {
 
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
+        
+        
+        try! realm.write {
+            if let selectItem = items?[indexPath.row] {
+                selectItem.done = !selectItem.done
+            }
+        }
+        tableView.reloadRows(at: [indexPath], with: UITableView.RowAnimation.fade)
         
     }
     
@@ -130,8 +137,11 @@ class TodoListViewController: UITableViewController {
         
     }
     
-    func loadItems() {
+    func loadItems(containsTitle:String?=nil) {
         items = selectedCategory?.items.sorted(byKeyPath: "title", ascending:true)
+        if let subTitle = containsTitle {
+            items = items?.filter("title contains '\(subTitle)'")
+        }
     }
     
     
@@ -146,7 +156,9 @@ extension TodoListViewController: UISearchBarDelegate {
 
     
     func searchBarTextDidEndEditing(_ searchBar: UISearchBar) {
-        
+        if let inputTitle = searchBar.text {
+            search(title: inputTitle)
+        }
     }
     
     func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
@@ -169,6 +181,7 @@ extension TodoListViewController: UISearchBarDelegate {
     
     func search(title: String) {
         
+        loadItems(containsTitle: title)
         self.tableView.reloadData()
         
     }
