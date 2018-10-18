@@ -7,11 +7,10 @@
 //
 
 import UIKit
-import CoreData
+import RealmSwift
 
 class CategoryViewController: UITableViewController {
 
-    let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
     var categories = [Category]()
     
     
@@ -43,15 +42,15 @@ class CategoryViewController: UITableViewController {
     
     override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
         
-        if editingStyle == .delete {
-            let curCategory = categories[indexPath.row]
-            categories.remove(at: indexPath.row)
-            context.delete(curCategory)
-            saveContext()
-            
-            tableView.deleteRows(at: [indexPath], with: UITableView.RowAnimation.fade)
-            
-        }
+//        if editingStyle == .delete {
+//            let curCategory = categories[indexPath.row]
+//            categories.remove(at: indexPath.row)
+//            context.delete(curCategory)
+//            saveContext()
+//
+//            tableView.deleteRows(at: [indexPath], with: UITableView.RowAnimation.fade)
+//
+//        }
     }
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
@@ -69,15 +68,15 @@ class CategoryViewController: UITableViewController {
     
     
     func loadCategories() -> [Category] {
-        let fr:NSFetchRequest<Category> = Category.fetchRequest()
-        var categories = [Category]()
-        do {
-             categories = try context.fetch(fr)
-        } catch {
-            print("load categories error:\(error)")
-        }
-        
-        return categories
+//        let fr:NSFetchRequest<Category> = Category.fetchRequest()
+//        var categories = [Category]()
+//        do {
+//             categories = try context.fetch(fr)
+//        } catch {
+//            print("load categories error:\(error)")
+//        }
+//
+        return [Category]()
     }
     
     
@@ -113,7 +112,7 @@ class CategoryViewController: UITableViewController {
             return
         }
         
-        let category = Category(context: context)
+        let category = Category()
         category.name = name
         
         categories.append(category)
@@ -126,10 +125,6 @@ class CategoryViewController: UITableViewController {
     
     
     func saveContext() {
-        do {
-            try context.save()
-        } catch {
-            print("save category error:\(error)")
-        }
+
     }
 }

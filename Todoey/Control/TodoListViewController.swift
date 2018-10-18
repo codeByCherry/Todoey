@@ -7,7 +7,6 @@
 //
 
 import UIKit
-import CoreData
 
 class TodoListViewController: UITableViewController {
 
@@ -15,7 +14,7 @@ class TodoListViewController: UITableViewController {
 
     var selectedCategory: Category? {
         didSet {
-            itemArr = self.loadItems()
+            //itemArr = self.loadItems()
         }
     }
     
@@ -25,13 +24,12 @@ class TodoListViewController: UITableViewController {
     
     let defaults = UserDefaults.standard
     let filePath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("Items.plist")
-    
-    let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
+
     
     override func viewDidLoad() {
         super.viewDidLoad()
         //TODO:: 读取写入的items
-        itemArr = loadItems()
+        //itemArr = loadItems()
     }
     
     
@@ -119,10 +117,10 @@ class TodoListViewController: UITableViewController {
     func addNewItemAndUpdateView(_ newItem : String?) {
         
 
-        let curItem = Item(context: context)
+        let curItem = Item()
         curItem.title = newItem ?? "no title"
         curItem.done = false
-        curItem.parentCategory = selectedCategory
+        //curItem.parentCategory = selectedCategory
         
         itemArr.append(curItem)
         saveItems()
@@ -132,54 +130,17 @@ class TodoListViewController: UITableViewController {
     
     
     func saveItems() {
-        if context.hasChanges == false {
-            return
-        }
-        
-        do {
-            try context.save()
-        } catch {
-            print("Error saving context:\(error)")
-        }
+
         
     }
     
-    func loadItems(reqeust: NSFetchRequest<Item> = Item.fetchRequest()) -> [Item]{
-        // 推荐下面的写法，更加OOP
-        // let fr = NSFetchRequest<Item>(entityName:"Item")
-        // let fr2:NSFetchRequest<Item> = Item.fetchRequest()
-        
-        var results = [Item]()
-        
-        let categoryBelongPredicate = NSPredicate(format: "parentCategory.name MATCHES %@", selectedCategory!.name!)
-        
-        
-        if let titleContainsPredicate = reqeust.predicate {
-            // 携带了搜索的predicate
-            let predicates = NSCompoundPredicate(andPredicateWithSubpredicates: [titleContainsPredicate,categoryBelongPredicate])
-            reqeust.predicate = predicates
-            
-        } else {
-            reqeust.predicate = categoryBelongPredicate
-        }
-        
-        do {
-            results = try context.fetch(reqeust)
-
-        } catch {
-            print("load items error:\(error)")
-        }
-        return results
+    func loadItems() {
+     
     }
     
     
     func deleteItem(atIndex index:NSInteger) {
-        let curItem = itemArr[index]
-        
-        context.delete(curItem)
-        itemArr.remove(at: index)
-        
-        saveItems()
+
     }
 }
 
@@ -212,21 +173,6 @@ extension TodoListViewController: UISearchBarDelegate {
     
     func search(title: String) {
         
-        let fetchRequest = NSFetchRequest<Item>(entityName: "Item")
-        let title = title.trimmingCharacters(in: CharacterSet.whitespaces)
-        if title.count == 0 {
-            // FixBug:: 直接点删除操作，删除searchbar中内容后，键盘不缩回。
-            DispatchQueue.main.async {
-                self.searchBar.endEditing(true)
-            }
-        } else {
-            fetchRequest.sortDescriptors = [NSSortDescriptor(key: "title", ascending: true)]
-            fetchRequest.predicate = NSPredicate(format: "title CONTAINS[cd] %@", title)
-        }
-        
-
-        tmpArr = itemArr
-        itemArr = loadItems(reqeust: fetchRequest)
         self.tableView.reloadData()
         
     }
