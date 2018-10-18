@@ -137,17 +137,11 @@ class TodoListViewController: UITableViewController {
         
     }
     
-    func loadItems(containsTitle:String?=nil) {
+    
+    func loadItems() {
         items = selectedCategory?.items.sorted(byKeyPath: "title", ascending:true)
-        if let subTitle = containsTitle {
-            items = items?.filter("title contains '\(subTitle)'")
-        }
     }
     
-    
-    func deleteItem(atIndex index:NSInteger) {
-
-    }
 }
 
 
@@ -155,35 +149,30 @@ class TodoListViewController: UITableViewController {
 extension TodoListViewController: UISearchBarDelegate {
 
     
-    func searchBarTextDidEndEditing(_ searchBar: UISearchBar) {
-        if let inputTitle = searchBar.text {
-            search(title: inputTitle)
-        }
-    }
-    
-    func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
-        
-    }
-    
-    
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
         if let inputTitle = searchBar.text {
-            search(title: inputTitle)
+            searchItem(subTitle: inputTitle)
+            self.tableView.reloadData()
         }
         searchBar.endEditing(true)
     }
     
     
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
-        print("search:'\(searchText)'")
-        search(title: searchText)
-    }
-    
-    func search(title: String) {
         
-        loadItems(containsTitle: title)
+        let searchText = searchText.trimmingCharacters(in: .whitespaces)
+        
+        if searchText.count == 0 {
+            loadItems()
+        } else {
+            searchItem(subTitle: searchText)
+        }
+        
         self.tableView.reloadData()
-        
+    }
+
+    func searchItem(subTitle: String) {
+        items = items?.filter(NSPredicate(format: "title CONTAINS[cd] %@", subTitle)).sorted(byKeyPath: "title", ascending: true)
     }
     
 }
