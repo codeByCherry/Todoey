@@ -7,57 +7,69 @@
 //
 
 import UIKit
-import CoreData
+import RealmSwift
 
 class CategoryViewController: UITableViewController {
 
-    let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
-    var categories = [Category]()
+    var categories: Results<Category>?
+    let realm = try! Realm()
     
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        categories = loadCategories()
+        loadCategories()
+        
     }
 
+    
     // MARK: - Table view data source
-
     override func numberOfSections(in tableView: UITableView) -> Int {
         return 1
     }
 
+    
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return categories.count
+        
+        return categories?.count ?? 0
     }
     
+    
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let curCategory = categories[indexPath.row]
         let cell = tableView.dequeueReusableCell(withIdentifier: "CategoryCell", for: indexPath)
-        cell.textLabel?.text = curCategory.name
+        
+        let category = categories?[indexPath.row]
+        cell.textLabel?.text = category?.name
+
         return cell
     }
+    
     
     override func tableView(_ tableView: UITableView, titleForDeleteConfirmationButtonForRowAt indexPath: IndexPath) -> String? {
         return "DEL"
     }
     
+    
     override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
         
         if editingStyle == .delete {
-            let curCategory = categories[indexPath.row]
-            categories.remove(at: indexPath.row)
-            context.delete(curCategory)
-            saveContext()
-            
+            let curCategory = categories![indexPath.row]
+            try! realm.write {
+                realm.delete(curCategory.items)
+                realm.delete(curCategory)
+            }
             tableView.deleteRows(at: [indexPath], with: UITableView.RowAnimation.fade)
-            
         }
     }
     
+    
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
-        let selectedCategory = categories[indexPath.row]
-        performSegue(withIdentifier: "ShowItems", sender: selectedCategory)
+        if let selectedCategory = categories?[indexPath.row] {
+            performSegue(withIdentifier: "ShowItems", sender: selectedCategory)
+        } else {
+            print("No categories")
+        }
+        
     }
 
     
@@ -68,16 +80,8 @@ class CategoryViewController: UITableViewController {
     }
     
     
-    func loadCategories() -> [Category] {
-        let fr:NSFetchRequest<Category> = Category.fetchRequest()
-        var categories = [Category]()
-        do {
-             categories = try context.fetch(fr)
-        } catch {
-            print("load categories error:\(error)")
-        }
-        
-        return categories
+    func loadCategories(){
+        categories =  realm.objects(Category.self).sorted(byKeyPath: "name", ascending: true)
     }
     
     
@@ -113,23 +117,27 @@ class CategoryViewController: UITableViewController {
             return
         }
         
-        let category = Category(context: context)
+        let category = Category()
         category.name = name
         
-        categories.append(category)
-        saveContext()
+        try! realm.write {
+             realm.add(category)
+        }
         
-        let indexPath = IndexPath(row: categories.count-1, section: 0)
-        self.tableView.insertRows(at: [indexPath], with: UITableView.RowAnimation.fade)
-        
+        self.tableView.reloadData()
     }
     
-    
-    func saveContext() {
-        do {
-            try context.save()
-        } catch {
-            print("save category error:\(error)")
+    override func tableView(_ tableView: UITableView, viewForFooterInSection section: Int) -> UIView? {
+        if categories?.count ?? 0 > 0 {
+            return nil
+        } else {
+            let view = UIView(frame: CGRect(x: 0, y: 0, width: 0, height: 0))
+            return view
         }
     }
+    
+    override func tableView(_ tableView: UITableView, heightForFooterInSection section: Int) -> CGFloat {
+        return 1
+    }
+    
 }

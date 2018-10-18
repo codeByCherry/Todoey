@@ -7,7 +7,7 @@
 //
 
 import UIKit
-import CoreData
+import RealmSwift
 
 class TodoListViewController: UITableViewController {
 
@@ -15,46 +15,43 @@ class TodoListViewController: UITableViewController {
 
     var selectedCategory: Category? {
         didSet {
-            itemArr = self.loadItems()
+            self.loadItems()
         }
     }
     
-    var tmpArr = [Item]()
-    var itemArr:[Item] = [Item]()
-    
-    
-    let defaults = UserDefaults.standard
-    let filePath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("Items.plist")
-    
-    let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
+    var items:Results<Item>?
+    let realm = try! Realm()
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        //TODO:: 读取写入的items
-        itemArr = loadItems()
     }
     
-    
 
+    override func viewWillAppear(_ animated: Bool) {
+        self.navigationItem.leftBarButtonItem?.tintColor = UIColor.red
+    }
     
     // MARK:- TableView DataSource
-    
     override func numberOfSections(in tableView: UITableView) -> Int {
         return 1
     }
     
     
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return itemArr.count
+        return items?.count ?? 0
     }
     
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "ToDoCell", for: indexPath)
-        let curItem = itemArr[indexPath.row]
         
-        cell.textLabel?.text = curItem.title
-        cell.accessoryType = curItem.done ? .checkmark : .none
+        if let curItem = items?[indexPath.row] {
+            cell.textLabel?.text = curItem.title
+            cell.accessoryType = curItem.done ? .checkmark : .none
+        } else {
+            cell.textLabel?.text = "None"
+            cell.accessoryType = .none
+        }
         return cell
     }
 
@@ -63,11 +60,14 @@ class TodoListViewController: UITableViewController {
 
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
-        let curItem = itemArr[indexPath.row]
         
-        curItem.done = !curItem.done
-        saveItems()
-        self.tableView.reloadRows(at: [indexPath], with: .fade)
+        
+        try! realm.write {
+            if let selectItem = items?[indexPath.row] {
+                selectItem.done = !selectItem.done
+            }
+        }
+        tableView.reloadRows(at: [indexPath], with: UITableView.RowAnimation.fade)
         
     }
     
@@ -79,8 +79,13 @@ class TodoListViewController: UITableViewController {
     override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
         
         if editingStyle == .delete {
-            deleteItem(atIndex: indexPath.row)
-            tableView.deleteRows(at: [indexPath], with: .left)
+            let curItem = selectedCategory!.items[indexPath.row]
+            print("delete:", curItem.title)
+            try! realm.write {
+                realm.delete(curItem)
+            }
+            
+            tableView.reloadData()
         }
         
     }
@@ -95,9 +100,6 @@ class TodoListViewController: UITableViewController {
 
         }
         
-        // change action item color
-        //alert.view.tintColor = UIColor.green
-        alert.tabBarController?.tabBar.backgroundColor = UIColor.red
 
         let action = UIAlertAction(title: "add item?", style: .default) { (action) in
             // when user click add item button.
@@ -119,68 +121,22 @@ class TodoListViewController: UITableViewController {
     func addNewItemAndUpdateView(_ newItem : String?) {
         
 
-        let curItem = Item(context: context)
-        curItem.title = newItem ?? "no title"
-        curItem.done = false
-        curItem.parentCategory = selectedCategory
-        
-        itemArr.append(curItem)
-        saveItems()
-        let newIndexPath = IndexPath(item: self.itemArr.count-1, section: 0)
-        self.tableView.insertRows(at: [newIndexPath], with:.fade)
+        if let curCategory = self.selectedCategory {
+            try! realm.write {
+                let curItem = Item()
+                curItem.title = newItem ?? "no title"
+                curItem.timeStamp = Date()
+                curCategory.items.append(curItem)
+            }
+        }
+        tableView.reloadData()
     }
     
     
-    func saveItems() {
-        if context.hasChanges == false {
-            return
-        }
-        
-        do {
-            try context.save()
-        } catch {
-            print("Error saving context:\(error)")
-        }
-        
+    func loadItems() {
+        items = selectedCategory?.items.sorted(byKeyPath: "title", ascending:true)
     }
     
-    func loadItems(reqeust: NSFetchRequest<Item> = Item.fetchRequest()) -> [Item]{
-        // 推荐下面的写法，更加OOP
-        // let fr = NSFetchRequest<Item>(entityName:"Item")
-        // let fr2:NSFetchRequest<Item> = Item.fetchRequest()
-        
-        var results = [Item]()
-        
-        let categoryBelongPredicate = NSPredicate(format: "parentCategory.name MATCHES %@", selectedCategory!.name!)
-        
-        
-        if let titleContainsPredicate = reqeust.predicate {
-            // 携带了搜索的predicate
-            let predicates = NSCompoundPredicate(andPredicateWithSubpredicates: [titleContainsPredicate,categoryBelongPredicate])
-            reqeust.predicate = predicates
-            
-        } else {
-            reqeust.predicate = categoryBelongPredicate
-        }
-        
-        do {
-            results = try context.fetch(reqeust)
-
-        } catch {
-            print("load items error:\(error)")
-        }
-        return results
-    }
-    
-    
-    func deleteItem(atIndex index:NSInteger) {
-        let curItem = itemArr[index]
-        
-        context.delete(curItem)
-        itemArr.remove(at: index)
-        
-        saveItems()
-    }
 }
 
 
@@ -188,47 +144,36 @@ class TodoListViewController: UITableViewController {
 extension TodoListViewController: UISearchBarDelegate {
 
     
-    func searchBarTextDidEndEditing(_ searchBar: UISearchBar) {
-        
-    }
-    
-    func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
-        
-    }
-    
-    
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
         if let inputTitle = searchBar.text {
-            search(title: inputTitle)
+            
+            let inputTitle = inputTitle.trimmingCharacters(in: .whitespaces)
+            if inputTitle.count == 0 {
+                return
+            }
+            
+            searchItem(subTitle: inputTitle)
+            self.tableView.reloadData()
         }
         searchBar.endEditing(true)
     }
     
     
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
-        print("search:'\(searchText)'")
-        search(title: searchText)
-    }
-    
-    func search(title: String) {
         
-        let fetchRequest = NSFetchRequest<Item>(entityName: "Item")
-        let title = title.trimmingCharacters(in: CharacterSet.whitespaces)
-        if title.count == 0 {
-            // FixBug:: 直接点删除操作，删除searchbar中内容后，键盘不缩回。
-            DispatchQueue.main.async {
-                self.searchBar.endEditing(true)
-            }
+        let searchText = searchText.trimmingCharacters(in: .whitespaces)
+        
+        if searchText.count == 0 {
+            loadItems()
         } else {
-            fetchRequest.sortDescriptors = [NSSortDescriptor(key: "title", ascending: true)]
-            fetchRequest.predicate = NSPredicate(format: "title CONTAINS[cd] %@", title)
+            searchItem(subTitle: searchText)
         }
         
-
-        tmpArr = itemArr
-        itemArr = loadItems(reqeust: fetchRequest)
         self.tableView.reloadData()
-        
+    }
+
+    func searchItem(subTitle: String) {
+        items = items?.filter(NSPredicate(format: "title CONTAINS[cd] %@", subTitle)).sorted(byKeyPath: "timeStamp", ascending: true)
     }
     
 }
