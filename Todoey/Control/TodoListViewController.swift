@@ -125,16 +125,11 @@ class TodoListViewController: UITableViewController {
             try! realm.write {
                 let curItem = Item()
                 curItem.title = newItem ?? "no title"
+                curItem.timeStamp = Date()
                 curCategory.items.append(curItem)
             }
         }
         tableView.reloadData()
-    }
-    
-    
-    func saveItems() {
-
-        
     }
     
     
@@ -172,7 +167,7 @@ extension TodoListViewController: UISearchBarDelegate {
     }
 
     func searchItem(subTitle: String) {
-        items = items?.filter(NSPredicate(format: "title CONTAINS[cd] %@", subTitle)).sorted(byKeyPath: "title", ascending: true)
+        items = items?.filter(NSPredicate(format: "title CONTAINS[cd] %@", subTitle)).sorted(byKeyPath: "timeStamp", ascending: true)
     }
     
 }

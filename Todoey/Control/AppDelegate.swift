@@ -15,16 +15,21 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
 
-
+    
+    
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         
-        UINavigationBar.appearance().tintColor = UIColor.white
-        
-        // Realm config
         print("Realm config:")
         print(Realm.Configuration.defaultConfiguration)
+        
+        UINavigationBar.appearance().tintColor = UIColor.white
+    
+        // Realm config
+
 
         return true
     }
+    
+    
 }
 
