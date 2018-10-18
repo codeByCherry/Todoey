@@ -8,6 +8,7 @@
 
 import UIKit
 import CoreData
+import RealmSwift
 
 
 @UIApplicationMain
@@ -17,8 +18,38 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        // Override point for customization after application launch.
+
         let filePath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
+        
+        // setup Realm
+        print("Realm config:")
+        print(Realm.Configuration.defaultConfiguration)
+        
+        let d1 = Data()
+        d1.age = 110
+        d1.name = "tony"
+        
+        var realm:Realm?
+        do {
+            realm = try Realm()
+    
+        } catch {
+            print("setup realm error:\(error)")
+        }
+        
+        if let r = realm {
+            do {
+               try r.write {
+                    r.add(d1)
+                }
+            } catch {
+                
+            }
+        }
+
+        
+        
+        
         print("Local File Path:\(filePath)")
         return true
     }
