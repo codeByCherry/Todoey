@@ -9,7 +9,7 @@
 import UIKit
 import RealmSwift
 
-class TodoListViewController: UITableViewController {
+class TodoListViewController: SwipeTableViewController {
 
     @IBOutlet weak var searchBar: UISearchBar!
 
@@ -43,7 +43,7 @@ class TodoListViewController: UITableViewController {
     
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "ToDoCell", for: indexPath)
+        let cell = super.tableView(tableView, cellForRowAt: indexPath)
         
         if let curItem = items?[indexPath.row] {
             cell.textLabel?.text = curItem.title
@@ -61,32 +61,12 @@ class TodoListViewController: UITableViewController {
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
         
-        
         try! realm.write {
             if let selectItem = items?[indexPath.row] {
                 selectItem.done = !selectItem.done
             }
         }
         tableView.reloadRows(at: [indexPath], with: UITableView.RowAnimation.fade)
-        
-    }
-    
-    override func tableView(_ tableView: UITableView, titleForDeleteConfirmationButtonForRowAt indexPath: IndexPath) -> String? {
-        return "Del"
-    }
-    
-    
-    override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
-        
-        if editingStyle == .delete {
-            let curItem = selectedCategory!.items[indexPath.row]
-            print("delete:", curItem.title)
-            try! realm.write {
-                realm.delete(curItem)
-            }
-            
-            tableView.reloadData()
-        }
         
     }
     
@@ -119,7 +99,6 @@ class TodoListViewController: UITableViewController {
     
     
     func addNewItemAndUpdateView(_ newItem : String?) {
-        
 
         if let curCategory = self.selectedCategory {
             try! realm.write {
@@ -135,6 +114,15 @@ class TodoListViewController: UITableViewController {
     
     func loadItems() {
         items = selectedCategory?.items.sorted(byKeyPath: "title", ascending:true)
+    }
+    
+    
+    override func deleteModels(at indexPath: IndexPath) {
+        if let curItem = items?[indexPath.row] {
+            try! realm.write {
+                realm.delete(curItem)
+            }
+        }
     }
     
 }
