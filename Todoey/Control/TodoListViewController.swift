@@ -61,6 +61,27 @@ class TodoListViewController: SwipeTableViewController {
     }
     
     
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        // reset orgin colors
+        guard let originColour = UIColor(hexString: "1d9bf6") else {
+            fatalError()
+        }
+        
+        guard let constrastingColor = UIColor.flatWhite() else {
+            fatalError()
+        }
+        
+        navigationController?.navigationBar.barTintColor = originColour
+        
+        navigationController?.navigationBar.tintColor = constrastingColor
+        
+        navigationController?.navigationBar.largeTitleTextAttributes =
+            [NSAttributedString.Key.foregroundColor: constrastingColor]
+        
+        
+    }
+    
     // MARK:- TableView DataSource
     override func numberOfSections(in tableView: UITableView) -> Int {
         return 1
