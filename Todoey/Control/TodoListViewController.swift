@@ -127,11 +127,18 @@ class TodoListViewController: SwipeTableViewController {
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
         
+        self.searchBar.endEditing(true)
+        
         try! realm.write {
+            
             if let selectItem = items?[indexPath.row] {
+                
                 selectItem.done = !selectItem.done
+                
             }
+        
         }
+        
         tableView.reloadRows(at: [indexPath], with: UITableView.RowAnimation.fade)
         
     }
@@ -219,9 +226,15 @@ extension TodoListViewController: UISearchBarDelegate {
         let searchText = searchText.trimmingCharacters(in: .whitespaces)
         
         if searchText.count == 0 {
+            
             loadItems()
+            
+            self.searchBar.endEditing(true)
+            
         } else {
+            
             searchItem(subTitle: searchText)
+            
         }
         
         self.tableView.reloadData()
