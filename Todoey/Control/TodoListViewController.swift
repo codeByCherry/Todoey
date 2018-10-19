@@ -18,16 +18,18 @@ class TodoListViewController: SwipeTableViewController {
     var selectedCategory: Category? {
         didSet {
             self.loadItems()
-            self.cellColor = UIColor(hexString: selectedCategory?.hexString)!
+            self.themeColor = UIColor(hexString: selectedCategory?.hexString)!
         }
     }
     
-    var cellColor:UIColor!
+    var themeColor:UIColor!
     var items:Results<Item>?
     let realm = try! Realm()
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        self.navigationController?.navigationBar.tintColor = themeColor
     }
     
 
@@ -60,7 +62,7 @@ class TodoListViewController: SwipeTableViewController {
         
         // update cell color
         let percent = CGFloat(indexPath.row)/CGFloat(items?.count ?? 10) * 0.53
-        let backgroundColor = cellColor.darken(byPercentage: percent)
+        let backgroundColor = themeColor.darken(byPercentage: percent)
         let constrastingColor = UIColor(contrastingBlackOrWhiteColorOn:backgroundColor!, isFlat:true)
         
         cell.backgroundColor = backgroundColor
