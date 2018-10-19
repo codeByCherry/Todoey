@@ -13,6 +13,8 @@ import SwipeCellKit
 
 class CategoryViewController: UITableViewController {
 
+    
+
     var categories: Results<Category>?
     let realm = try! Realm()
     
@@ -37,7 +39,8 @@ class CategoryViewController: UITableViewController {
     
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "CategoryCell", for: indexPath)
+        let cell = tableView.dequeueReusableCell(withIdentifier: "CategoryCell", for: indexPath) as! SwipeTableViewCell
+        cell.delegate = self
         
         let category = categories?[indexPath.row]
         cell.textLabel?.text = category?.name
@@ -71,7 +74,7 @@ class CategoryViewController: UITableViewController {
         }
         
     }
-
+    
     
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
@@ -147,5 +150,26 @@ class CategoryViewController: UITableViewController {
             realm.delete(category)
         }
     }
+    
+}
+
+
+// MARK:- swipe cell delegate methods
+extension CategoryViewController: SwipeTableViewCellDelegate {
+    
+    func tableView(_ tableView: UITableView, editActionsForRowAt indexPath: IndexPath, for orientation: SwipeActionsOrientation) -> [SwipeAction]? {
+        guard orientation == .right else { return nil }
+        
+        let deleteAction = SwipeAction(style: .destructive, title: "Delete") { action, indexPath in
+            // handle action by updating model with deletion
+            print("trigge delete action")
+        }
+        
+        // customize the action appearance
+        deleteAction.image = UIImage(named: "delete-icon")
+        
+        return [deleteAction]
+    }
+    
     
 }
