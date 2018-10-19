@@ -29,12 +29,18 @@ class TodoListViewController: SwipeTableViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        self.navigationController?.navigationBar.tintColor = themeColor
+//        guard let naviBar = navigationController?.navigationBar else {
+//            fatalError("has no bar!")
+//        }
+
     }
     
 
     override func viewWillAppear(_ animated: Bool) {
-        self.navigationItem.leftBarButtonItem?.tintColor = UIColor.red
+//        self.navigationItem.leftBarButtonItem?.tintColor = UIColor.red
+        
+        self.navigationController?.navigationBar.tintColor = themeColor
+        self.title = selectedCategory?.name
     }
     
     // MARK:- TableView DataSource
