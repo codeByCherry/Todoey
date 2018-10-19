@@ -12,7 +12,7 @@ import RealmSwift
 
 class Category: Object {
     @objc dynamic var name: String = ""
-    
+    @objc dynamic var hexString: String = ""
     // bulid relationship between Category and Item
     // 在realm中使用 list 替换 array
     let items = List<Item>()
