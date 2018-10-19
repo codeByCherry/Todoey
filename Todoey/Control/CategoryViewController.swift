@@ -13,12 +13,15 @@ import SwipeCellKit
 
 class CategoryViewController: UITableViewController {
 
+    
+
     var categories: Results<Category>?
     let realm = try! Realm()
     
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        tableView.rowHeight = 80
         loadCategories()
         
     }
@@ -37,28 +40,13 @@ class CategoryViewController: UITableViewController {
     
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "CategoryCell", for: indexPath)
+        let cell = tableView.dequeueReusableCell(withIdentifier: "CategoryCell", for: indexPath) as! SwipeTableViewCell
+        cell.delegate = self
         
         let category = categories?[indexPath.row]
         cell.textLabel?.text = category?.name
 
         return cell
-    }
-    
-    
-    override func tableView(_ tableView: UITableView, titleForDeleteConfirmationButtonForRowAt indexPath: IndexPath) -> String? {
-        return "DEL"
-    }
-    
-    
-    override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
-
-        if editingStyle == .delete {
-            let curCategory = categories![indexPath.row]
-            deleteCategory(curCategory)
-            
-            tableView.deleteRows(at: [indexPath], with: UITableView.RowAnimation.fade)
-        }
     }
     
     
@@ -71,7 +59,7 @@ class CategoryViewController: UITableViewController {
         }
         
     }
-
+    
     
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
@@ -141,11 +129,34 @@ class CategoryViewController: UITableViewController {
     }
     
     
-    func deleteCategory(_ category:Category) {
+    func deleteCategory(_ category:Category, at indexPath:IndexPath?=nil) {
         try! realm.write {
             realm.delete(category.items)
             realm.delete(category)
         }
     }
+    
+}
+
+
+// MARK:- swipe cell delegate methods
+extension CategoryViewController: SwipeTableViewCellDelegate {
+    
+    func tableView(_ tableView: UITableView, editActionsForRowAt indexPath: IndexPath, for orientation: SwipeActionsOrientation) -> [SwipeAction]? {
+        guard orientation == .right else { return nil }
+        
+        let deleteAction = SwipeAction(style: .destructive, title: nil) { action, indexPath in
+            // handle action by updating model with deletion
+            let selectedCategory = self.categories![indexPath.row]
+            self.deleteCategory(selectedCategory)
+            self.tableView.deleteRows(at: [indexPath], with: UITableView.RowAnimation.fade)
+        }
+        
+        // customize the action appearance
+        deleteAction.image = UIImage(named: "delete-icon")
+        
+        return [deleteAction]
+    }
+    
     
 }
