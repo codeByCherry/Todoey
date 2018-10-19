@@ -34,51 +34,55 @@ class TodoListViewController: SwipeTableViewController {
 
     override func viewWillAppear(_ animated: Bool) {
         
-        guard let navBar = navigationController?.navigationBar else {
-            fatalError("no bar here")
-        }
-        
-        guard let colourHex = selectedCategory?.hexString else {
-            fatalError("no color here")
-        }
-        
-        title = selectedCategory?.name
-        
-        guard let navBarColour = UIColor(hexString: colourHex) else {
+        guard let hexString = selectedCategory?.hexString else {
             fatalError()
         }
         
-        // 返回键的颜色
-        navBar.tintColor = UIColor(contrastingBlackOrWhiteColorOn: navBarColour, isFlat: true)
-        
-        navBar.barTintColor = navBarColour
-        
-        navBar.largeTitleTextAttributes = [NSAttributedString.Key.foregroundColor: navBar.tintColor]
-        
-        searchBar.tintColor = navBarColour
-        
-        searchBar.barTintColor = navBarColour
+        setupNavigationBarColor(hexString: hexString, autoConstrast: true)
+    
     }
     
     
     
     override func viewWillDisappear(_ animated: Bool) {
         // reset orgin colors
-        guard let originColour = UIColor(hexString: "1d9bf6") else {
+        setupNavigationBarColor(hexString: "1d9bf6", autoConstrast: false)
+        
+    }
+    
+    
+    func setupNavigationBarColor(hexString: String, autoConstrast: Bool) {
+        
+        guard let themeColor = UIColor(hexString: hexString) else {
             fatalError()
         }
         
-        guard let constrastingColor = UIColor.flatWhite() else {
+        let textColor:UIColor
+        
+        guard let flatWhiteColor = UIColor.flatWhite() else {
             fatalError()
         }
         
-        navigationController?.navigationBar.barTintColor = originColour
+        guard let autoConstrastColor = UIColor(contrastingBlackOrWhiteColorOn: themeColor, isFlat: true) else {
+            fatalError()
+        }
         
-        navigationController?.navigationBar.tintColor = constrastingColor
+        textColor = autoConstrast ? autoConstrastColor: flatWhiteColor
+        
+        navigationController?.navigationBar.barTintColor = themeColor
+        
+        navigationController?.navigationBar.tintColor = textColor
         
         navigationController?.navigationBar.largeTitleTextAttributes =
-            [NSAttributedString.Key.foregroundColor: constrastingColor]
+            [NSAttributedString.Key.foregroundColor: textColor]
         
+        
+        if autoConstrast == true {
+            
+            searchBar.tintColor = textColor
+            
+            searchBar.barTintColor = themeColor
+        }
         
     }
     
