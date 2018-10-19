@@ -29,19 +29,37 @@ class TodoListViewController: SwipeTableViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-//        guard let naviBar = navigationController?.navigationBar else {
-//            fatalError("has no bar!")
-//        }
-
     }
     
 
     override func viewWillAppear(_ animated: Bool) {
-//        self.navigationItem.leftBarButtonItem?.tintColor = UIColor.red
         
-        self.navigationController?.navigationBar.tintColor = themeColor
-        self.title = selectedCategory?.name
+        guard let navBar = navigationController?.navigationBar else {
+            fatalError("no bar here")
+        }
+        
+        guard let colourHex = selectedCategory?.hexString else {
+            fatalError("no color here")
+        }
+        
+        title = selectedCategory?.name
+        
+        guard let navBarColour = UIColor(hexString: colourHex) else {
+            fatalError()
+        }
+        
+        // 返回键的颜色
+        navBar.tintColor = UIColor(contrastingBlackOrWhiteColorOn: navBarColour, isFlat: true)
+        
+        navBar.barTintColor = navBarColour
+        
+        navBar.largeTitleTextAttributes = [NSAttributedString.Key.foregroundColor: navBar.tintColor]
+        
+        searchBar.tintColor = navBarColour
+        
+        searchBar.barTintColor = navBarColour
     }
+    
     
     // MARK:- TableView DataSource
     override func numberOfSections(in tableView: UITableView) -> Int {
