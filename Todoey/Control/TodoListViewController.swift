@@ -8,6 +8,8 @@
 
 import UIKit
 import RealmSwift
+import ChameleonFramework
+
 
 class TodoListViewController: SwipeTableViewController {
 
@@ -53,6 +55,13 @@ class TodoListViewController: SwipeTableViewController {
             cell.textLabel?.text = "None"
             cell.accessoryType = .none
         }
+        
+        // update cell color
+        let percent = CGFloat(indexPath.row)/CGFloat(items?.count ?? 10) * 0.6
+        let backgroundColor = UIColor.flatSkyBlue()?.darken(byPercentage: percent)
+        cell.backgroundColor = backgroundColor
+        
+        cell.textLabel?.textColor = UIColor(contrastingBlackOrWhiteColorOn:backgroundColor!, isFlat:true)
         
         return cell
     }
