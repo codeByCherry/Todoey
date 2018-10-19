@@ -22,6 +22,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         print("Realm config:")
         print(Realm.Configuration.defaultConfiguration)
         
+        // 修改返回键颜色
         UINavigationBar.appearance().tintColor = UIColor.white
     
         // Realm config

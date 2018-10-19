@@ -8,27 +8,39 @@
 
 import UIKit
 import RealmSwift
+import ChameleonFramework
 
-class TodoListViewController: UITableViewController {
+
+class TodoListViewController: SwipeTableViewController {
 
     @IBOutlet weak var searchBar: UISearchBar!
 
     var selectedCategory: Category? {
         didSet {
             self.loadItems()
+            self.themeColor = UIColor(hexString: selectedCategory?.hexString)!
         }
     }
     
+    var themeColor:UIColor!
     var items:Results<Item>?
     let realm = try! Realm()
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+//        guard let naviBar = navigationController?.navigationBar else {
+//            fatalError("has no bar!")
+//        }
+
     }
     
 
     override func viewWillAppear(_ animated: Bool) {
-        self.navigationItem.leftBarButtonItem?.tintColor = UIColor.red
+//        self.navigationItem.leftBarButtonItem?.tintColor = UIColor.red
+        
+        self.navigationController?.navigationBar.tintColor = themeColor
+        self.title = selectedCategory?.name
     }
     
     // MARK:- TableView DataSource
@@ -43,15 +55,26 @@ class TodoListViewController: UITableViewController {
     
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "ToDoCell", for: indexPath)
+        let cell = super.tableView(tableView, cellForRowAt: indexPath)
         
         if let curItem = items?[indexPath.row] {
             cell.textLabel?.text = curItem.title
             cell.accessoryType = curItem.done ? .checkmark : .none
+            cell.backgroundColor = UIColor(hexString: curItem.hexString)
         } else {
             cell.textLabel?.text = "None"
             cell.accessoryType = .none
         }
+        
+        // update cell color
+        let percent = CGFloat(indexPath.row)/CGFloat(items?.count ?? 10) * 0.53
+        let backgroundColor = themeColor.darken(byPercentage: percent)
+        let constrastingColor = UIColor(contrastingBlackOrWhiteColorOn:backgroundColor!, isFlat:true)
+        
+        cell.backgroundColor = backgroundColor
+        cell.textLabel?.textColor = constrastingColor
+        cell.tintColor = constrastingColor
+        
         return cell
     }
 
@@ -61,32 +84,12 @@ class TodoListViewController: UITableViewController {
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
         
-        
         try! realm.write {
             if let selectItem = items?[indexPath.row] {
                 selectItem.done = !selectItem.done
             }
         }
         tableView.reloadRows(at: [indexPath], with: UITableView.RowAnimation.fade)
-        
-    }
-    
-    override func tableView(_ tableView: UITableView, titleForDeleteConfirmationButtonForRowAt indexPath: IndexPath) -> String? {
-        return "Del"
-    }
-    
-    
-    override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
-        
-        if editingStyle == .delete {
-            let curItem = selectedCategory!.items[indexPath.row]
-            print("delete:", curItem.title)
-            try! realm.write {
-                realm.delete(curItem)
-            }
-            
-            tableView.reloadData()
-        }
         
     }
     
@@ -119,13 +122,13 @@ class TodoListViewController: UITableViewController {
     
     
     func addNewItemAndUpdateView(_ newItem : String?) {
-        
 
         if let curCategory = self.selectedCategory {
             try! realm.write {
                 let curItem = Item()
                 curItem.title = newItem ?? "no title"
                 curItem.timeStamp = Date()
+                curItem.hexString = UIColor.randomFlat()?.hexValue() ?? "#BB00BB"
                 curCategory.items.append(curItem)
             }
         }
@@ -135,6 +138,15 @@ class TodoListViewController: UITableViewController {
     
     func loadItems() {
         items = selectedCategory?.items.sorted(byKeyPath: "title", ascending:true)
+    }
+    
+    
+    override func deleteModels(at indexPath: IndexPath) {
+        if let curItem = items?[indexPath.row] {
+            try! realm.write {
+                realm.delete(curItem)
+            }
+        }
     }
     
 }
