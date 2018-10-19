@@ -18,9 +18,11 @@ class TodoListViewController: SwipeTableViewController {
     var selectedCategory: Category? {
         didSet {
             self.loadItems()
+            self.cellColor = UIColor(hexString: selectedCategory?.hexString)!
         }
     }
     
+    var cellColor:UIColor!
     var items:Results<Item>?
     let realm = try! Realm()
     
@@ -57,11 +59,13 @@ class TodoListViewController: SwipeTableViewController {
         }
         
         // update cell color
-        let percent = CGFloat(indexPath.row)/CGFloat(items?.count ?? 10) * 0.6
-        let backgroundColor = UIColor.flatSkyBlue()?.darken(byPercentage: percent)
-        cell.backgroundColor = backgroundColor
+        let percent = CGFloat(indexPath.row)/CGFloat(items?.count ?? 10) * 0.53
+        let backgroundColor = cellColor.darken(byPercentage: percent)
+        let constrastingColor = UIColor(contrastingBlackOrWhiteColorOn:backgroundColor!, isFlat:true)
         
-        cell.textLabel?.textColor = UIColor(contrastingBlackOrWhiteColorOn:backgroundColor!, isFlat:true)
+        cell.backgroundColor = backgroundColor
+        cell.textLabel?.textColor = constrastingColor
+        cell.tintColor = constrastingColor
         
         return cell
     }
