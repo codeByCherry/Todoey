@@ -30,6 +30,7 @@ class TodoListViewController: SwipeTableViewController {
         super.viewDidLoad()
         
         self.navigationController?.navigationBar.tintColor = themeColor
+        self.title = selectedCategory?.name
     }
     
 
