@@ -21,6 +21,7 @@ class CategoryViewController: UITableViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        tableView.rowHeight = 80
         loadCategories()
         
     }
@@ -46,22 +47,6 @@ class CategoryViewController: UITableViewController {
         cell.textLabel?.text = category?.name
 
         return cell
-    }
-    
-    
-    override func tableView(_ tableView: UITableView, titleForDeleteConfirmationButtonForRowAt indexPath: IndexPath) -> String? {
-        return "DEL"
-    }
-    
-    
-    override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
-
-        if editingStyle == .delete {
-            let curCategory = categories![indexPath.row]
-            deleteCategory(curCategory)
-            
-            tableView.deleteRows(at: [indexPath], with: UITableView.RowAnimation.fade)
-        }
     }
     
     
@@ -144,7 +129,7 @@ class CategoryViewController: UITableViewController {
     }
     
     
-    func deleteCategory(_ category:Category) {
+    func deleteCategory(_ category:Category, at indexPath:IndexPath?=nil) {
         try! realm.write {
             realm.delete(category.items)
             realm.delete(category)
@@ -160,9 +145,11 @@ extension CategoryViewController: SwipeTableViewCellDelegate {
     func tableView(_ tableView: UITableView, editActionsForRowAt indexPath: IndexPath, for orientation: SwipeActionsOrientation) -> [SwipeAction]? {
         guard orientation == .right else { return nil }
         
-        let deleteAction = SwipeAction(style: .destructive, title: "Delete") { action, indexPath in
+        let deleteAction = SwipeAction(style: .destructive, title: nil) { action, indexPath in
             // handle action by updating model with deletion
-            print("trigge delete action")
+            let selectedCategory = self.categories![indexPath.row]
+            self.deleteCategory(selectedCategory)
+            self.tableView.deleteRows(at: [indexPath], with: UITableView.RowAnimation.fade)
         }
         
         // customize the action appearance
