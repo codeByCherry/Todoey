@@ -29,18 +29,61 @@ class TodoListViewController: SwipeTableViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-//        guard let naviBar = navigationController?.navigationBar else {
-//            fatalError("has no bar!")
-//        }
-
     }
     
 
     override func viewWillAppear(_ animated: Bool) {
-//        self.navigationItem.leftBarButtonItem?.tintColor = UIColor.red
         
-        self.navigationController?.navigationBar.tintColor = themeColor
-        self.title = selectedCategory?.name
+        guard let hexString = selectedCategory?.hexString else {
+            fatalError()
+        }
+        
+        setupNavigationBarColor(hexString: hexString, autoConstrast: true)
+    
+    }
+    
+    
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        // reset orgin colors
+        setupNavigationBarColor(hexString: "1d9bf6", autoConstrast: false)
+        
+    }
+    
+    
+    func setupNavigationBarColor(hexString: String, autoConstrast: Bool) {
+        
+        guard let themeColor = UIColor(hexString: hexString) else {
+            fatalError()
+        }
+        
+        let textColor:UIColor
+        
+        guard let flatWhiteColor = UIColor.flatWhite() else {
+            fatalError()
+        }
+        
+        guard let autoConstrastColor = UIColor(contrastingBlackOrWhiteColorOn: themeColor, isFlat: true) else {
+            fatalError()
+        }
+        
+        textColor = autoConstrast ? autoConstrastColor: flatWhiteColor
+        
+        navigationController?.navigationBar.barTintColor = themeColor
+        
+        navigationController?.navigationBar.tintColor = textColor
+        
+        navigationController?.navigationBar.largeTitleTextAttributes =
+            [NSAttributedString.Key.foregroundColor: textColor]
+        
+        
+        if autoConstrast == true {
+            
+            searchBar.tintColor = textColor
+            
+            searchBar.barTintColor = themeColor
+        }
+        
     }
     
     // MARK:- TableView DataSource
