@@ -8,6 +8,8 @@
 
 import UIKit
 import RealmSwift
+import SwipeCellKit
+
 
 class CategoryViewController: UITableViewController {
 
@@ -50,13 +52,11 @@ class CategoryViewController: UITableViewController {
     
     
     override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
-        
+
         if editingStyle == .delete {
             let curCategory = categories![indexPath.row]
-            try! realm.write {
-                realm.delete(curCategory.items)
-                realm.delete(curCategory)
-            }
+            deleteCategory(curCategory)
+            
             tableView.deleteRows(at: [indexPath], with: UITableView.RowAnimation.fade)
         }
     }
@@ -99,7 +99,16 @@ class CategoryViewController: UITableViewController {
         let add = UIAlertAction(title: "add", style: .default) { (action) in
             let textfiele = alert.textFields?.first!
             if let inputName = textfiele?.text {
-                self.saveNewCategory(name: inputName)
+                let inputName = inputName.trimmingCharacters(in: .whitespaces)
+                if inputName.count == 0 {
+                    //TODO:: prompt input something to store.
+                    return
+                }
+                
+                let category = Category()
+                category.name = inputName
+                self.saveNewCategory(category)
+                self.tableView.reloadData()
             }
             
         }
@@ -110,22 +119,6 @@ class CategoryViewController: UITableViewController {
     }
     
     
-    
-    func saveNewCategory(name:String) {
-        let name = name.trimmingCharacters(in: .whitespaces)
-        if name.count == 0 {
-            return
-        }
-        
-        let category = Category()
-        category.name = name
-        
-        try! realm.write {
-             realm.add(category)
-        }
-        
-        self.tableView.reloadData()
-    }
     
     override func tableView(_ tableView: UITableView, viewForFooterInSection section: Int) -> UIView? {
         if categories?.count ?? 0 > 0 {
@@ -138,6 +131,21 @@ class CategoryViewController: UITableViewController {
     
     override func tableView(_ tableView: UITableView, heightForFooterInSection section: Int) -> CGFloat {
         return 1
+    }
+    
+    
+    func saveNewCategory(_ category:Category) {
+        try! realm.write {
+            realm.add(category)
+        }
+    }
+    
+    
+    func deleteCategory(_ category:Category) {
+        try! realm.write {
+            realm.delete(category.items)
+            realm.delete(category)
+        }
     }
     
 }
